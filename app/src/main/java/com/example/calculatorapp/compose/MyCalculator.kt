@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -93,10 +94,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
     }
 
     fun onClear() {
-        number1 = "";
-        number2 = "";
-        operator = "";
-        result = ""
+        number1 = ""; number2 = ""; operator = ""; result = ""
     }
 
     @Composable
@@ -111,9 +109,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
                 }
             },
             modifier = Modifier.size(72.dp)
-        ) {
-            Text(label, fontSize = 20.sp)
-        }
+        ) { Text(label, fontSize = 20.sp) }
     }
 
     @Composable
@@ -121,16 +117,23 @@ fun MyCalculator(modifier: Modifier = Modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            labels.forEach { Key(it) }
-        }
+        ) { labels.forEach { Key(it) } }
     }
 
-    Column(modifier = modifier.padding(16.dp)) {
-        val display = if (operator.isEmpty()) number1 else "$number1 $operator $number2 ="
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        val display = when {
+            operator.isEmpty() -> number1
+            result.isNotEmpty() -> "$number1 $operator $number2 = $result"
+            else -> "$number1 $operator $number2"
+        }
         Text(display, fontSize = 32.sp)
-        Spacer(Modifier.height(24.dp))
 
+        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.weight(1f))
 
         RowKeys("7","8","9","/")
         Spacer(Modifier.height(12.dp))
@@ -139,13 +142,10 @@ fun MyCalculator(modifier: Modifier = Modifier) {
         RowKeys("1","2","3","-")
         Spacer(Modifier.height(12.dp))
         RowKeys("0","C","=","+")
-
-        Spacer(Modifier.height(20.dp))
-        Text("Result : $result", fontSize = 20.sp)
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun MyPreview() {
     MyCalculator()
