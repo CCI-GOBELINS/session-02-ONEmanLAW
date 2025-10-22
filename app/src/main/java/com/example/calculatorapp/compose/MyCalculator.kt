@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.calculatorapp.Calculator
 
 
 @Composable
@@ -60,6 +61,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
     val number1 = remember { mutableStateOf("") }
     val number2 = remember { mutableStateOf("") }
     val result = remember { mutableStateOf("") }
+    val calculator = remember { Calculator() }
     Column {
         CalculatorField(
             label = "Number 1",
@@ -80,8 +82,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
             CalculatorButton(
                 label = "+",
                 onClick = {
-                    result.value = (number1.value.toInt() + number2.value.toInt()).toString()
-
+                    result.value = calculator.add(number1.value, number2.value)
                 },
                 modifier = modifier
             )
@@ -89,7 +90,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
             CalculatorButton(
                 label = "-",
                 onClick = {
-                    result.value = (number1.value.toInt() - number2.value.toInt()).toString()
+                    result.value = calculator.sub(number1.value, number2.value)
                 },
                 modifier = modifier
             )
@@ -105,7 +106,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
             CalculatorButton(
                 label = "/",
                 onClick = {
-                    result.value = (number1.value.toInt() / number2.value.toInt()).toString()
+                    result.value = calculator.mul(number1.value, number2.value)
                 },
                 modifier = modifier
             )
@@ -113,11 +114,15 @@ fun MyCalculator(modifier: Modifier = Modifier) {
             CalculatorButton(
                 label = "*",
                 onClick = {
-                    result.value = (number1.value.toInt() * number2.value.toInt()).toString()
+                    result.value = calculator.div(number1.value, number2.value)
                 },
                 modifier = modifier
             )
         }
+
+        Spacer(modifier = Modifier.padding(12.dp))
+
+        Text(text = "Result : ${result.value}")
 
 
     }

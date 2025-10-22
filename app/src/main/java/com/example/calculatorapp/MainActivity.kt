@@ -21,7 +21,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             CalculatorAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MyCalculator()
+                    MyCalculator(
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
