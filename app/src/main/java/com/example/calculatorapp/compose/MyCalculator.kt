@@ -73,28 +73,58 @@ fun MyCalculator(modifier: Modifier = Modifier) {
     var number2 by remember { mutableStateOf("") }
     var operator by remember { mutableStateOf("") }
     var result by remember { mutableStateOf("") }
+    var justEvaluated by remember { mutableStateOf(false) }
 
-    fun onDigit(digit: String) {
-        if (operator.isEmpty()) number1 += digit else number2 += digit
+    fun applyOp(a: String, b: String, op: String): String = when (op) {
+        "+" -> calculator.add(a, b)
+        "-" -> calculator.sub(a, b)
+        "*" -> calculator.mul(a, b)
+        "/" -> calculator.div(a, b)
+        else -> ""
+    }
+
+    fun onDigit(d: String) {
+        if (justEvaluated) {
+            number1 = d; number2 = "";
+            operator = "";
+            result = "";
+            justEvaluated = false
+            return
+        }
+        if (operator.isEmpty()) number1 += d else number2 += d
     }
 
     fun onOperator(op: String) {
-        if (number1.isNotEmpty()) operator = op
+        if (number1.isEmpty()) return
+        if (justEvaluated) {
+            number1 = result; result = ""; justEvaluated = false; operator = op; number2 = ""
+            return
+        }
+        if (operator.isEmpty()) {
+            operator = op
+        } else if (number2.isEmpty()) {
+            operator = op
+        } else {
+            val r = applyOp(number1, number2, operator)
+            if (r.startsWith("Erreur")) { result = r; justEvaluated = true; return }
+            number1 = r
+            number2 = ""
+            operator = op
+        }
     }
 
     fun onEqual() {
         if (number1.isEmpty() || number2.isEmpty() || operator.isEmpty()) return
-        result = when (operator) {
-            "+" -> calculator.add(number1, number2)
-            "-" -> calculator.sub(number1, number2)
-            "*" -> calculator.mul(number1, number2)
-            "/" -> calculator.div(number1, number2)
-            else -> ""
-        }
+        result = applyOp(number1, number2, operator)
+        justEvaluated = true
     }
 
     fun onClear() {
-        number1 = ""; number2 = ""; operator = ""; result = ""
+        number1 = "";
+        number2 = "";
+        operator = "";
+        result = "";
+         justEvaluated = false
     }
 
     @Composable
@@ -125,14 +155,14 @@ fun MyCalculator(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        val display = when {
-            operator.isEmpty() -> number1
-            result.isNotEmpty() -> "$number1 $operator $number2 = $result"
-            else -> "$number1 $operator $number2"
-        }
+        val display =
+            if (justEvaluated && result.isNotEmpty())
+                "$number1 $operator $number2 = $result"
+            else
+                listOf(number1, operator, number2).filter { it.isNotEmpty() }.joinToString(" ")
+
         Text(display, fontSize = 32.sp)
 
-        Spacer(Modifier.height(12.dp))
         Spacer(Modifier.weight(1f))
 
         RowKeys("7","8","9","/")
@@ -144,6 +174,7 @@ fun MyCalculator(modifier: Modifier = Modifier) {
         RowKeys("0","C","=","+")
     }
 }
+
 
 @Preview
 @Composable
