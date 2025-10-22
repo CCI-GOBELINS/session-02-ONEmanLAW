@@ -68,113 +68,80 @@ fun CalculatorButton(label: String, onClick: () -> Unit, modifier: Modifier = Mo
 fun MyCalculator(modifier: Modifier = Modifier) {
     val calculator = remember { Calculator() }
 
-    val number1 = remember { mutableStateOf("") }
-    val number2 = remember { mutableStateOf("") }
-    val operator = remember { mutableStateOf("") }
-    val result = remember { mutableStateOf("") }
+    var number1 by remember { mutableStateOf("") }
+    var number2 by remember { mutableStateOf("") }
+    var operator by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("") }
 
-    fun onDigit(d: String) {
-        if (operator.value.isEmpty()) number1.value += d else number2.value += d
+    fun onDigit(digit: String) {
+        if (operator.isEmpty()) number1 += digit else number2 += digit
     }
-    fun onOp(o: String) {
-        if (number1.value.isNotEmpty()) operator.value = o
+
+    fun onOperator(op: String) {
+        if (number1.isNotEmpty()) operator = op
     }
+
     fun onEqual() {
-        if (number1.value.isEmpty() || number2.value.isEmpty() || operator.value.isEmpty()) return
-        result.value = when (operator.value) {
-            "+" -> calculator.add(number1.value, number2.value)
-            "-" -> calculator.sub(number1.value, number2.value)
-            "*" -> calculator.mul(number1.value, number2.value)
-            "/" -> calculator.div(number1.value, number2.value)
+        if (number1.isEmpty() || number2.isEmpty() || operator.isEmpty()) return
+        result = when (operator) {
+            "+" -> calculator.add(number1, number2)
+            "-" -> calculator.sub(number1, number2)
+            "*" -> calculator.mul(number1, number2)
+            "/" -> calculator.div(number1, number2)
             else -> ""
         }
     }
+
     fun onClear() {
-        number1.value = "";
-        number2.value = "";
-        operator.value = "";
-        result.value = ""
+        number1 = "";
+        number2 = "";
+        operator = "";
+        result = ""
     }
 
-    Column(
-        modifier = modifier.padding(16.dp)
-    ) {
-        val display = if (operator.value.isEmpty()) number1.value
-        else "${number1.value} ${operator.value} ${number2.value} ="
-        Text(text = display, fontSize = 32.sp)
+    @Composable
+    fun Key(label: String) {
+        ElevatedButton(
+            onClick = {
+                when {
+                    label.all { it.isDigit() } -> onDigit(label)
+                    label in listOf("+", "-", "*", "/") -> onOperator(label)
+                    label == "=" -> onEqual()
+                    label == "C" -> onClear()
+                }
+            },
+            modifier = Modifier.size(72.dp)
+        ) {
+            Text(label, fontSize = 20.sp)
+        }
+    }
 
+    @Composable
+    fun RowKeys(vararg labels: String) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            labels.forEach { Key(it) }
+        }
+    }
+
+    Column(modifier = modifier.padding(16.dp)) {
+        val display = if (operator.isEmpty()) number1 else "$number1 $operator $number2 ="
+        Text(display, fontSize = 32.sp)
         Spacer(Modifier.height(24.dp))
 
 
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ElevatedButton(onClick = { onDigit("7") },
-                modifier = Modifier.size(70.dp)) { Text("7", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("8") },
-                modifier = Modifier.size(70.dp)) { Text("8", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("9") },
-                modifier = Modifier.size(70.dp)) { Text("9", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onOp("/") },
-                modifier = Modifier.size(70.dp)) { Text("/", fontSize = 20.sp) }
-        }
-
+        RowKeys("7","8","9","/")
         Spacer(Modifier.height(12.dp))
-
-
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ElevatedButton(onClick = { onDigit("4") },
-                modifier = Modifier.size(70.dp)) { Text("4", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("5") },
-                modifier = Modifier.size(70.dp)) { Text("5", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("6") },
-                modifier = Modifier.size(70.dp)) { Text("6", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onOp("*") },
-                modifier = Modifier.size(70.dp)) { Text("*", fontSize = 20.sp) }
-        }
-
+        RowKeys("4","5","6","*")
         Spacer(Modifier.height(12.dp))
-
-
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ElevatedButton(onClick = { onDigit("1") },
-                modifier = Modifier.size(70.dp)) { Text("1", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("2") },
-                modifier = Modifier.size(70.dp)) { Text("2", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onDigit("3") },
-                modifier = Modifier.size(70.dp)) { Text("3", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onOp("-") },
-                modifier = Modifier.size(70.dp)) { Text("-", fontSize = 20.sp) }
-        }
-
+        RowKeys("1","2","3","-")
         Spacer(Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ElevatedButton(onClick = { onDigit("0") },
-                modifier = Modifier.size(70.dp)) { Text("0", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onClear() },
-                modifier = Modifier.size(70.dp)) { Text("C", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onEqual() },
-                modifier = Modifier.size(70.dp)) { Text("=", fontSize = 20.sp) }
-            ElevatedButton(onClick = { onOp("+") },
-                modifier = Modifier.size(70.dp)) { Text("+", fontSize = 20.sp) }
-        }
+        RowKeys("0","C","=","+")
 
         Spacer(Modifier.height(20.dp))
-        Text(text = "Result : ${result.value}", fontSize = 20.sp)
+        Text("Result : $result", fontSize = 20.sp)
     }
 }
 
